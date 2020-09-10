@@ -2,7 +2,7 @@
 
 # Starts ssh
 
-/usr/sbin/sshd
+#/usr/sbin/sshd
 
 # Starts php process in background
 

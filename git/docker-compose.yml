@@ -11,8 +11,6 @@ services:
       - $PWD/jenkins_home:/var/jenkins_home
     networks:
       - net
-    dns:
-      - "8.8.8.8"
   remote_host:
     container_name: remote-host
     image: remote-host
@@ -37,21 +35,20 @@ services:
     build:
       context: jenkins-ansible/web
     ports:
-      - "80:80"
+      - "8888:80"
     networks:
       - net
-    dns:
-      - "8.8.8.8"
   git:
     container_name: git-server
-    image: 'gitlab/gitlab-ce:latest'
-    hostname: 'gitlab.example.com'
+    hostname: gitlab.example.com
     ports:
-      - '8090:80'
+      - "443:443"
+      - "80:80"
     volumes:
-      - '/srv/gitlab/config:/etc/gitlab'
-      - '/srv/gitlab/logs:/var/log/gitlab'
-      - '/srv/gitlab/data:/var/opt/gitlab'
+      - "/srv/gitlab/config:/etc/gitlab"
+      - "/srv/gitlab/logs:/var/log/gitlab"
+      - "/srv/gitlab/data:/var/opt/gitlab"
+    image: gitlab/gitlab-ce
     networks:
       - net
 networks:

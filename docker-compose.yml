@@ -1,0 +1,69 @@
+version: '3'
+services:
+  jenkins:
+    user: "1000:1000"
+    container_name: jenkins
+#    image: jenkins/jenkins
+#    image: jenkins-ansible
+    image: jenkins-pipeline
+    build:
+#      context: jenkins-ansible
+      context: ultima_leccion
+    dns:
+      - "8.8.8.8"
+    ports:
+      - "8080:8080"
+    volumes:
+      - $PWD/jenkins_home:/var/jenkins_home:rw
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - net
+  remote_host:
+    container_name: remote_host_jenkins
+    image: remote-host
+    build:
+      context: ./centos7
+    networks:
+      - net
+    volumes:
+      - "./centos7/script.sh:/tmp/script.sh:ro"
+  db_host: 
+    container_name: db
+    image: mysql:5.7
+    environment:
+      - "MYSQL_ROOT_PASSWORD=1234"
+    volumes:
+      - "$PWD/db_data:/var/lib/mysql"
+    networks:
+      - net
+  web:
+    container_name: web
+    image: ansible-web
+    build:
+      context: jenkins/jenkins-ansible/web
+    ports:
+      - "8888:80"
+    networks:
+      - net
+    dns:
+      - "8.8.8.8"
+  git:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.example.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.example.com'
+        # Add any other gitlab.rb configuration here, each on its own line
+    ports:
+      - '5080:80'
+      - '5443:443'
+      - '5522:22'
+    volumes:
+      - './gitlab/config:/etc/gitlab'
+      - './gitlab/logs:/var/log/gitlab'
+      - './gitlab/data:/var/opt/gitlab'
+    networks:
+      - net
+networks:
+  net:
